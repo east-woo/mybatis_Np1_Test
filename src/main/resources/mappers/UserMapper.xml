@@ -9,13 +9,16 @@
     </insert>
 
     <!--Nested Select 방식 (N+1 발생)-->
-    <resultMap id="UserOrderMap" type="com.eastwoo.mybatis_test.dto.User">
+
+    <resultMap id="UserOrderMapNp1" type="com.eastwoo.mybatis_test.dto.User">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
         <collection property="orders" ofType="com.eastwoo.mybatis_test.dto.Order" select="getOrdersByUserId" column="id"/>
     </resultMap>
-
-    <select id="getUsersWithOrdersNestedSelect" resultMap="UserOrderMap">
+    <select id="getOrdersByUserId" resultType="com.eastwoo.mybatis_test.dto.Order" parameterType="int">
+        SELECT * FROM orders WHERE user_id = #{userId}
+    </select>
+    <select id="getUsersWithOrdersNestedSelect" resultMap="UserOrderMapNp1">
         SELECT * FROM users
     </select>
 
@@ -24,7 +27,7 @@
     <resultMap id="UserOrderMap" type="com.eastwoo.mybatis_test.dto.User">
         <id property="id" column="user_id"/>
         <result property="name" column="user_name"/>
-        <collection property="orders" ofType="Order">
+        <collection property="orders" ofType="com.eastwoo.mybatis_test.dto.Order">
             <id property="id" column="order_id"/>
             <result property="amount" column="amount"/>
         </collection>
