@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eastwoo.mybatis_test.mapper.UserMapper">
+
+    <!--데이터 삽입-->
+    <insert id="insertUser" parameterType="com.eastwoo.mybatis_test.dto.User">
+        INSERT INTO users (name)
+        VALUES (#{name})
+    </insert>
+
+    <!--Nested Select 방식 (N+1 발생)-->
+    <resultMap id="UserOrderMap" type="com.eastwoo.mybatis_test.dto.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <collection property="orders" ofType="com.eastwoo.mybatis_test.dto.Order" select="getOrdersByUserId" column="id"/>
+    </resultMap>
+
+    <select id="getUsersWithOrdersNestedSelect" resultMap="UserOrderMap">
+        SELECT * FROM users
+    </select>
+
+
+    <!--Nested Result 방식 (JOIN 사용, N+1 해결)-->
+    <resultMap id="UserOrderMap" type="com.eastwoo.mybatis_test.dto.User">
+        <id property="id" column="user_id"/>
+        <result property="name" column="user_name"/>
+        <collection property="orders" ofType="Order">
+            <id property="id" column="order_id"/>
+            <result property="amount" column="amount"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUsersWithOrdersNestedResult" resultMap="UserOrderMap">
+        SELECT u.id AS user_id, u.name AS user_name, o.id AS order_id, o.amount
+        FROM users u
+                 LEFT JOIN orders o ON u.id = o.user_id
+    </select>
+
+</mapper>
